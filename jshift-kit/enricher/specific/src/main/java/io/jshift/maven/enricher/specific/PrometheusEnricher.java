@@ -19,12 +19,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import io.fabric8.kubernetes.api.builder.TypedVisitor;
 import io.fabric8.kubernetes.api.model.KubernetesListBuilder;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.jshift.kit.build.service.docker.ImageConfiguration;
 import io.jshift.kit.common.Configs;
+import io.jshift.kit.common.KitLogger;
 import io.jshift.kit.common.util.MapUtil;
 import io.jshift.kit.config.image.build.BuildConfiguration;
 import io.jshift.kit.config.resource.PlatformMode;
@@ -37,12 +39,14 @@ public class PrometheusEnricher extends BaseEnricher {
 
     static final String ANNOTATION_PROMETHEUS_PORT = "prometheus.io/port";
     static final String ANNOTATION_PROMETHEUS_SCRAPE = "prometheus.io/scrape";
+    static final String ANNOTATION_PROMETHEUS_PATH = "prometheus.io/path";
 
     static final String ENRICHER_NAME = "jshift-prometheus";
     static final String PROMETHEUS_PORT = "9779";
 
     private enum Config implements Configs.Key {
-        prometheusPort;
+        prometheusPort,
+        prometheusPath;
 
         public String def() { return d; } protected String d;
     }
@@ -58,13 +62,19 @@ public class PrometheusEnricher extends BaseEnricher {
             public void visit(ServiceBuilder serviceBuilder) {
                 String prometheusPort = findPrometheusPort();
                 if (StringUtils.isNotBlank(prometheusPort)) {
-                    log.verbose("Add prometheus.io annotations: %s=%s, %s=%s",
-                            ANNOTATION_PROMETHEUS_SCRAPE, "true",
-                            ANNOTATION_PROMETHEUS_PORT, prometheusPort);
-
                     Map<String, String> annotations = new HashMap<>();
                     MapUtil.putIfAbsent(annotations, ANNOTATION_PROMETHEUS_PORT, prometheusPort);
                     MapUtil.putIfAbsent(annotations, ANNOTATION_PROMETHEUS_SCRAPE, "true");
+                    String prometheusPath = getConfig(Config.prometheusPath);
+                    if (StringUtils.isNotBlank(prometheusPath)) {
+                        MapUtil.putIfAbsent(annotations, ANNOTATION_PROMETHEUS_PATH, prometheusPath);
+                    }
+
+                    log.verbose("Adding prometheus.io annotations: %s",
+                            annotations.entrySet()
+                                    .stream()
+                                    .map(Object::toString)
+                                    .collect(Collectors.joining(", ")));
                     serviceBuilder.editMetadata().addToAnnotations(annotations).endMetadata();
                 }
             }
