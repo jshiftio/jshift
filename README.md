@@ -1,5 +1,7 @@
 # Jshift
 
+> *Note: This repository has been moved to [Eclipse Jkube](https://github.com/eclipse/jkube). In case you want to contribute please send PRs to https://github.com/eclipse/jkube repo*.
+
 [![Circle CI](https://circleci.com/gh/jshiftio/jshift/tree/master.svg?style=shield)](https://circleci.com/gh/jshiftio/jshift-kit/tree/master)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=jshiftio_jshift&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=jshiftio_jshift)
 [![Gitter](https://badges.gitter.im/jshift-community/community.svg)](https://gitter.im/jshift-community/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
